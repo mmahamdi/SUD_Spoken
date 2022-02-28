@@ -1,0 +1,61 @@
+package adaptrhapsodie {
+
+	rule compound_1 {
+    	pattern { e: GOV -[compound]-> DEP; GOV[form="substance"|"mouvance"|"secteur"|"rues"|"people"] }
+        commands {e.label="mod" ; DEP.upos="ADJ"}
+}
+	rule compound_2 {
+    	pattern {e: GOV -[compound]-> DEP; GOV[form="mot"|"terme"|"couleur"|"lamés"|"commission"]}
+        commands {e.label="mod@appos" }
+    
+}
+
+	rule compound_3 {
+    	pattern {e: GOV -[compound]-> DEP; GOV[form="président"|"épidémiologiste" ]}
+        commands {e.label="conj:appos" }
+    
+}
+
+	rule compound_4 {
+    	pattern {e: GOV -[compound]-> DEP; GOV[form="hémisphère"|"type"|"vendredi"|"interview"|"pied"|"accent"]}
+        commands {e.label="mod" }
+    
+}
+
+	rule deletecompredx {
+    	pattern {e: GOV -[comp:pred@x]-> DEP}
+        commands {e.label="comp:pred" ;}
+    
+}
+	rule changeparataxis {
+    	pattern {e: GOV -[parataxis]-> DEP}
+        commands {e.label="conj:appos" ;}
+    
+}
+    
+}
+	rule etc {
+		pattern {N1[form="et"]; N2[form="caetera"] ; e:N1->N2 }
+    	commands { del_edge e ; del_node N2 ; N1.form="etc" ; N1.lemma="etc"; N1.upos="ADV"}
+    
+}
+    
+
+	rule ilya_1 {
+    	pattern { N [form="il"|"-il"] ;N2[form="y"|"y'"] ; N3[lemma="avoir"]; e:N3-[comp:obl|mod|comp|comp:obj@expl|comp@x]->N2 ; f:N3-[subj|comp:obj@expl|comp:obl]->N}
+    	without {N3-[1=comp]-> N4; N4[lemma="an"|"année"]}
+    	commands { e.label="comp@expl"}
+    
+}
+	rule ilya_2 {
+		pattern { N [form="il"|"-il"] ;N2[form="y"|"y'"] ; N3[lemma="avoir"]; e:N3->N2; N3-[1=comp]->N4; N4[lemma="an"|"année"]}
+		commands { e.label="comp"}
+    
+}
+
+    
+
+
+
+
+strat main {Seq (Onf (adaptrhapsodie))}	

@@ -1,0 +1,116 @@
+package adaptparisstories {
+
+	rule compound_1 {
+    	pattern { e: GOV -[compound]-> DEP; GOV[upos="PROPN"]; DEP[upos="PROPN"]}
+        commands {e.label="flat"}
+}
+	rule compound_2 {
+    	pattern {e: GOV -[compound]-> DEP; DEP[upos="ADP"]; f:DEP->DEP2}
+        commands {e.label="udep" ; f.label = "comp:obj"}
+    
+}
+	rule parataxis_1 {
+    	pattern {e: GOV -[parataxis]-> DEP; GOV[form="savait"]; R[form="__0__"]}
+        commands {del_edge e ;  add_edge R -[root]-> DEP ; shift_out GOV =[1=parataxis]=> DEP}
+}
+
+	rule parataxis_2 {
+    	pattern {e: GOV -[parataxis]-> DEP; GOV[form="est"]}
+        commands {e.label=discourse}
+}
+
+rule deletetense {
+    	pattern {e: GOV -[comp:aux@tense]-> DEP}
+        commands {e.label="comp:aux" ;}
+}
+	rule deletecompredx {
+    	pattern {e: GOV -[comp:pred@x]-> DEP}
+        commands {e.label="comp:pred" ;}
+    
+}
+	rule passif_1 {
+    	pattern {e: GOV -[comp:obl]-> DEP ; GOV[VerbForm=Part]; DEP[form="par"] ; GOV[lemma <> "passer"]}
+        commands {e.deep="agent" }
+    
+}
+	rule passif_2 {
+    	pattern {e: GOV -[comp:obl|mod]-> DEP ; GOV[VerbForm=Part]; DEP[form="de"]; GOV[lemma="accompagner"|"remplir"|"dégouter"|"composer"|"épuiser"|"recouvrir"]}
+    	commands {e.label="comp:obl@agent" }
+    
+}
+	rule passif_3 {
+    	pattern { e:GOV -[comp:obl]-> DEP; GOV[lemma="faire"]; DEP[upos="PRON"]; GOV->DEP2 ; DEP2[VerbForm=Inf]}
+    	commands {e.deep="@agent" }
+    
+}
+    
+
+	rule causatif_1 {
+        pattern { e:GOV -[comp:obj@x|comp:aux|comp:obj]-> DEP; GOV[lemma="faire"]; DEP[VerbForm=Inf]; DEP>GOV}
+    	commands {e.label = "comp:aux@caus"}
+    
+}
+	rule causatif_2 {
+    	pattern { GOV -> DEP; GOV[lemma="faire"]; DEP[VerbForm=Inf]; DEP>GOV; GOV2->GOV; e:GOV2-[subj]->S}
+		without{DEP2[form="par"]; DEP->DEP2;}
+		without {DEP3[form="se"]; DEP3<<GOV}
+    	commands {e.label = "subj@caus"}
+    
+}
+	rule causatif_3 {
+    	pattern { GOV -> DEP; GOV[lemma="faire"]; DEP[VerbForm=Inf]; DEP>GOV; GOV2->GOV; GOV3-[1=comp]->GOV2;e:GOV3-[subj]->S}
+		without{DEP2[form="par"]; DEP->DEP2;}
+		without {DEP3[form="se"]; DEP3<<GOV}
+    	commands {e.label = "subj@caus"}
+    
+}
+
+	rule weirdlabels_1 {
+		pattern { e : GOV -[comp:obl:pred]-> DEP ;}
+    	commands {e.label = "comp:obl"}
+    
+}
+	rule weirdlabels_2 {
+		pattern { e : GOV -[conj:obj]-> DEP ;}
+    	commands {e.label = "comp:obj"}
+    
+}
+    
+}
+	rule etc_1 {
+		pattern {N1[form="et"]; N2[form="cetera"] ; e:N1->N2 }
+    	commands { del_edge e ; del_node N2 ; N1.form="etc" ; N1.lemma="etc"; N1.upos="ADV"}
+    
+}
+	rule etc_2 {
+		pattern {N1[form="etcetera"|"etcétéra"]}
+    	commands {N1.form="etc" ; N1.lemma="etc"; N1.upos="ADV"}
+    
+}
+	rule ilya_1 {
+    	pattern { N [form="il"|"-il"] ;N2[form="y"|"y'"] ; N3[lemma="avoir"]; e:N3-[comp:obl|mod|comp|comp:obj@expl|comp@x]->N2 ; f:N3-[subj|comp:obj@expl|comp:obl]->N}
+    	without {N3-[1=comp]-> N4; N4[lemma="an"|"semaine"]}
+    	commands { e.label="comp@expl"; f.label="subj@expl"}
+    
+}
+	rule ilya_2 {
+    	pattern { N [form="il"|"-il"] ;N2[form="y"|"y'"] ; N3[lemma="avoir"]; e:N3-[comp:obl|comp@expl]->N2 ; f:N3-[subj@expl]->N ; N3-[1=comp]-> N4; N4[lemma="an"|"semaine"]}
+    	commands { e.label="comp"; f.label="subj"}
+    
+}
+	rule ilya_3 {
+    	pattern { N [form="y'"]; N3[lemma="avoir"]; e:N3-[mod|comp:obl]->N ;N3[VerbForm=Fin]}
+		without{N2[form="il"|"n'"]; N2<<N; N3->N2}
+        commands { N.form="y"; add_node I:<N; I.form="il"; I.lemma="il"; I.upos="PRON"; I.Gender="Masc"; I.Number="Sing"; I.Person="3"; I.PronType="Prs"; add_edge N3-[subj@expl]->I; e.label="comp@expl" }
+    
+}
+	rule ilya_4 {
+    	pattern { N [form="y"]; N3[lemma="avoir"]; e:N3-[mod|comp:obl]->N ;N3[VerbForm=Fin]}
+		without{N2[form="il"|"n'"]; N2<<N; N3->N2}
+        commands { add_node I:<N; I.form="il"; I.lemma="il"; I.upos="PRON"; I.Gender="Masc"; I.Number="Sing"; I.Person="3"; I.PronType="Prs"; add_edge N3-[subj@expl]->I; e.label="comp@expl" }
+    
+}
+
+
+
+strat main {Seq (Onf (adaptparisstories))}	
