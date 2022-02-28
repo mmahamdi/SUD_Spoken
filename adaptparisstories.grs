@@ -18,14 +18,6 @@ package adaptparisstories {
     	pattern {e: GOV -[parataxis]-> DEP; GOV[form="est"]}
         commands {e.label=discourse}
 }
-
-rule deletetense {
-    	pattern {e: GOV -[comp:aux@tense]-> DEP}
-        commands {e.label="comp:aux" ;}
-}
-	rule deletecompredx {
-    	pattern {e: GOV -[comp:pred@x]-> DEP}
-        commands {e.label="comp:pred" ;}
     
 }
 	rule passif_1 {
@@ -40,7 +32,7 @@ rule deletetense {
 }
 	rule passif_3 {
     	pattern { e:GOV -[comp:obl]-> DEP; GOV[lemma="faire"]; DEP[upos="PRON"]; GOV->DEP2 ; DEP2[VerbForm=Inf]}
-    	commands {e.deep="@agent" }
+    	commands {e.label="comp:obl@agent" }
     
 }
     
