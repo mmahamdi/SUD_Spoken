@@ -21,10 +21,6 @@ package adaptrhapsodie {
         commands {e.label="mod" }
     
 }
-
-	rule deletecompredx {
-    	pattern {e: GOV -[comp:pred@x]-> DEP}
-        commands {e.label="comp:pred" ;}
     
 }
 	rule changeparataxis {
